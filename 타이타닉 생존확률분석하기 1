@@ -1,0 +1,82 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import LabelEncoder
+
+df = pd.read_csv('titanic.csv')
+df.head()
+
+
+cat_df = df.copy()
+cat_df['Survived'].value_counts()
+set(cat_df['Survived'].values)
+
+cat_features =['PassengerId', 'Survived', 'Name', 'Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
+cat_target = ['Survived']
+
+enc = {}
+for feat in ['PassengerId', 'Survived', 'Name', 'Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']:
+  enc[feat] = LabelEncoder()
+  cat_df[feat] = enc[feat].fit_transform(cat_df[feat])
+print(feat)
+
+cat_df = cat_df.drop(['PassengerId', 'SibSp', 'Parch', 'Cabin', 'Ticket', 'Embarked'], axis=1)
+
+cat_df.head()
+
+
+trainGini = []
+testGini= []
+trainEntropy = []
+testEntropy = []
+depth = []
+
+data = np.array(cat_df)
+feature_data = data[:, :-1]
+target_data = data[:, -1]
+
+trainX, testX, trainY, testY = \
+    train_test_split(cat_df['Pclass'], cat_df['Survived'], test_size = 0.2)
+
+
+print(type(trainX))
+
+trainX = trainX.reshape(-1, 6) 
+testX = testX.reshape(-1, 6)
+
+trainX.shape, trainY.shape 
+
+trainX = trainX[:891] 
+trainY = trainY[:891]
+testX = testX[:891] 
+testY = testY[:891]
+
+print(type(trainX))
+
+for k in range(1, 31):
+
+  dt = DecisionTreeClassifier(criterion='gini', max_depth=k)
+  dt.fit(trainX, trainY)
+
+  trainGini.append(dt.score(trainX, trainY))
+  testGini.append(dt.score(testX, testY))
+
+  dt = DecisionTreeClassifier(criterion='entropy', max_depth=k)
+  dt.fit (trainX, trainY)
+
+  trainEntropy.append(dt.score(trainX, trainY))
+  testEntropy.append(dt.score(testX, testY))
+
+acc = dt.score(testX, testY)
+print('정확도 = ', np.round(acc,5))
+
+
+
+
+
+
+
+
+
